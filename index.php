@@ -1,6 +1,6 @@
 <?php
 $to_get = isset($_GET["ids"]);
-if(!$to_get || !isset($_GET["search"]))
+if(!$to_get && !isset($_GET["search"]))
 {
 	die("[]");
 }
