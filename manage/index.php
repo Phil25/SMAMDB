@@ -19,7 +19,7 @@ require(__DIR__ . "/../steamauth/steamauth.php");
 <?php
 } else {
 	$sid = $_SESSION["steamid"];
-	$config = require("config.php");
+	$config = require(__DIR__ . "/../config.php");
 	$db = new mysqli($config["host"], $config["user"], $config["pass"], $config["dbname"]);
 
 	if($db->connect_error)
