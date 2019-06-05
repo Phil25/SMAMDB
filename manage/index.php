@@ -11,11 +11,16 @@ require(__DIR__ . "/../steamauth/steamauth.php");
 	<title>Manager</title>
 </head>
 <body>
-<?php if(!isset($_SESSION['steamid'])) { ?>
-	<center>
-	<h2>Log in to access this webpage:</h2>
-	<?php loginbutton("rectangle"); ?>
-	</center>
+<?php if(!isset($_SESSION["steamid"])) { ?>
+
+<center>
+<h2>Please log in to access this page.</h2>
+<?php loginbutton("rectangle"); ?>
+<br>
+<br>
+<a href="https://github.com/Phil25/SMAMDB/wiki#what-is-smamdb">What is this?</a>
+</center>
+
 <?php
 } else {
 	$sid = $_SESSION["steamid"];
@@ -32,12 +37,20 @@ require(__DIR__ . "/../steamauth/steamauth.php");
 
 	if($res->num_rows == 0)
 	{
-		echo "<center><h2>Sorry, you do not have access to this website.</h2>";
-		logoutbutton();
-		echo "</center>";
+?>
+<center>
+	<h2>You do not have access to this page.</h2>
+	<?php logoutbutton(); ?>
+</center>
+<br/>
+
+<a href="https://github.com/Phil25/SMAMDB/wiki/Submitting-a-plugin-or-extension">How to submit your plugin/extension</a>.
+
+<?php
 	}
 	else
 	{
+		include(__DIR__ . "/../steamauth/userInfo.php");
 		include("manager.php");
 	}
 }
