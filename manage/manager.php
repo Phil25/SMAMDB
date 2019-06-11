@@ -42,6 +42,15 @@ if(isset($_GET["id"]))
 			$addon["author"] = $addon_data["author"];
 			$addon["forumid"] = $addon_data["forumid"];
 			$addon["url"] = $addon_data["url"];
+			$addon["files"] = "";
+			$files = $db->query("SELECT file FROM files WHERE addon='$idesc'");
+			if($files->num_rows > 0)
+			{
+				while($file = $files->fetch_assoc())
+				{
+					$addon["files"] .= $file["file"] . "\n";
+				}
+			}
 		}
 		else
 		{
@@ -56,8 +65,9 @@ if(isset($_GET["id"]))
 
 ?>
 
-<form>
-Load existing: <input type="text" name="id" placeholder="Addon ID" required>
+<form><fieldset>
+<legend>Load addon</legend>
+<input type="text" name="id" placeholder="Addon ID" required>
 <input type="submit" value="Load">
 <?php if(isset($_GET["id"]))
 {
@@ -71,9 +81,7 @@ Load existing: <input type="text" name="id" placeholder="Addon ID" required>
 	}
 }
 ?>
-</form>
-
-<br><br>
+</fieldset></form>
 
 <form action="/manage/process.php" method="post"><fieldset>
 <legend>Edit addon</legend>
@@ -86,7 +94,7 @@ Author <input type="text" name="author" placeholder="Addon author" style="float:
 
 Plugin ID
 <div class="tooltip">(?)
-	<span class="tooltiptext">Found in the header of the plugin's AlliedModders thread.</span>
+	<span class="tooltiptext">Found on top of AlliedModders thread.</span>
 </div>
 <br>
 <?php
@@ -112,8 +120,7 @@ Base URL
 <div class="tooltip">(?)
 	<span class="tooltiptext">
 		<p>URL which will be searched for the specified files.</p>
-		<p>Official AlliedModders forums and GitHub are treated individually. Full information and examples on how to choose the base URL can be found here TODO.</p>
-		<p>In case of distributing the addon on the AlliedModders forums, please make sure the URL is the post containing the post with the attachments only, not the entire thread (for simplicity purposes).</p>
+		<p>AlliedModders forums and GitHub are treated individually. Information/examples on selecting base URL here TODO.</p>
 	</span>
 </div>
 <input type="url" name="url" placeholder="URL searched for files" style="width:100%" value="<?php echo $addon["url"]; ?>" required>
@@ -123,15 +130,20 @@ Files
 <div class="tooltip">(?)
 	<span class="tooltiptext"><ul>
 		<li>Separated by newline.</li>
+		<li>Path and speparated by semicolon (<span class="code">;</span>)</li>
+		<li>Format: <span class="code">(path)/;(file)</span> (for SM root:<span class="code">./;(file)</span>).</li>
 		<li>Relative to <span class="code">(mod)/addons/sourcemod/</span>.</li>
-		<li>Must be the <span class="code">(path)/(file)</span> format, for file at root use <span class="code">./(file)</span>.</li>
 		<li>May go up two directories at most (up to <span class="code">(mod)/</span>).</li>
 		<li>Archives are extracted preserving their inner directory structure.</li>
 		<li>Do not include directories.</li>
 		<li>View cohesive examples here TODO.</li>
 	</ul></span>
 </div>
-<textarea name="files" cols="40" rows="5" placeholder="plugins/;thriller.smx&#10;gamedata/;thriller.plugin.txt&#10;plugins/;AdvancedInfinteAmmo.smx&#10;./;funcommandsX_.*.zip&#10;../../;.*" style="width:100%" required></textarea>
+<textarea name="files" cols="40" rows="5" placeholder="plugins/;thriller.smx
+gamedata/;thriller.plugin.txt
+plugins/;AdvancedInfinteAmmo.smx
+./;funcommandsX_.*.zip
+../../;.*" style="width:100%" required><?php echo $addon["files"]; ?></textarea>
 <br><br>
 
 <input type="submit" value="Add/Update">
