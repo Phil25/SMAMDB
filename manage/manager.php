@@ -19,6 +19,10 @@
 .tooltip:hover .tooltiptext {
 	visibility: visible;
 }
+.code {
+	font-family: monospace;
+	background-color: DarkGray
+}
 </style>
 
 <div style="max-width:500px;padding:20px;margin:20px">
@@ -119,15 +123,15 @@ Files
 <div class="tooltip">(?)
 	<span class="tooltiptext"><ul>
 		<li>Separated by newline.</li>
-		<li>Relative to <span style="font-family:monospace;background-color:DarkGray">(mod)/addons/sourcemod/</span>.</li>
-		<li>Must be the <span style="font-family:monospace;background-color:DarkGray">(path)/(file)</span> format, for file at root use <span style="font-family:monospace;background-color:DarkGray">./(file)</span>.</li>
-		<li>May go up two directories at most (up to <span style="font-family:monospace;background-color:DarkGray">(mod)/</span>).</li>
+		<li>Relative to <span class="code">(mod)/addons/sourcemod/</span>.</li>
+		<li>Must be the <span class="code">(path)/(file)</span> format, for file at root use <span class="code">./(file)</span>.</li>
+		<li>May go up two directories at most (up to <span class="code">(mod)/</span>).</li>
 		<li>Archives are extracted preserving their inner directory structure.</li>
 		<li>Do not include directories.</li>
 		<li>View cohesive examples here TODO.</li>
 	</ul></span>
 </div>
-<textarea name="files" cols="40" rows="5" placeholder="plugins/thriller.smx&#10;gamedata/thriller.plugin.txt&#10;plugins/AdvancedInfinteAmmo.smx&#10;./funcommandsX_.*.zip&#10;../../.*" style="width:100%" required></textarea>
+<textarea name="files" cols="40" rows="5" placeholder="plugins/;thriller.smx&#10;gamedata/;thriller.plugin.txt&#10;plugins/;AdvancedInfinteAmmo.smx&#10;./;funcommandsX_.*.zip&#10;../../;.*" style="width:100%" required></textarea>
 <br><br>
 
 <input type="submit" value="Add/Update">
