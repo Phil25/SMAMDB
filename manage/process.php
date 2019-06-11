@@ -8,9 +8,9 @@ if(!isset($_SESSION["steamid"]))
 	die("No access.");
 }
 
-$sid = $_SESSION["steamid"];
-$config = require(__DIR__ . "/../config.php");
-$db = new mysqli($config["host"], $config["muser"], $config["mpass"], $config["dbname"]);
+$sid	= $_SESSION["steamid"];
+$config	= require(__DIR__ . "/../config.php");
+$db		= new mysqli($config["host"], $config["muser"], $config["mpass"], $config["dbname"]);
 
 if($db->connect_error)
 {
@@ -30,53 +30,47 @@ checkPost("forumid");
 checkPost("url");
 checkPost("files");
 checkPost("author");
+validateFiles($_POST["files"]);
 
-$id			= $_POST["id"];
+$id			= $db->real_escape_string($_POST["id"]);
 $forumid	= getNumForumId($_POST["forumid"]);
-$url		= $_POST["url"];
-$author		= $_POST["author"];
-$files		= array_map('trim', explode("\n", $_POST["files"])); // explode and trim each
+$files		= $db->real_escape_string($_POST["files"]);
+$url		= $db->real_escape_string($_POST["url"]);
+$author		= $db->real_escape_string($_POST["author"]);
 
-validateFiles($files);
-
-$idesc		= $db->real_escape_string($id);
-$forumidesc	= $db->real_escape_string($forumid);
-$urlesc		= $db->real_escape_string($url);
-$authoresc	= $db->real_escape_string($author);
-
-$sql = "SELECT addedby FROM addons WHERE id='$idesc'";
+$sql = "SELECT addedby FROM addons WHERE id='$id'";
 $res = $db->query($sql);
 
 if($res->num_rows == 0) // Addon not found
 {
-	$sql = "INSERT INTO addons(id, forumid, url, author, addedby) VALUES" .
-	"('$idesc', '$forumidesc', '$urlesc', '$authoresc', '" . $_SESSION["steamid"] . "');";
+	$sql = "INSERT INTO addons(id, forumid, url, files, author, addedby) VALUES" .
+	"('$id', '$forumid', '$url', '$files', '$author', '" . $_SESSION["steamid"] . "');";
 
 	if($db->query($sql))
 	{
-		err("Addon $idesc added successfully!");
+		err("Addon $id added successfully!");
 	}
 	else
 	{
-		err("Adding addon $idesc failed.");
+		err("Adding addon $id failed.");
 	}
 }
 else // Addon found
 {
 	if($res->fetch_assoc()["addedby"] != $_SESSION["steamid"])
 	{
-		err("You have no access to $idesc");
+		err("You have no access to $id");
 	}
 
-	$sql = "UPDATE addons set forumid='$forumidesc', url='$urlesc', author='$authoresc' WHERE id='$idesc'";
+	$sql = "UPDATE addons set forumid='$forumid', url='$url', files='$files', author='$author' WHERE id='$id'";
 
 	if($db->query($sql))
 	{
-		err("Addon $idesc updated successfully!");
+		err("Addon $id updated successfully!");
 	}
 	else
 	{
-		err("Updating addon $idesc failed.");
+		err("Updating addon $id failed.");
 	}
 }
 
@@ -119,7 +113,8 @@ function getNumForumId($idstr) : int
 
 function validateFiles($files)
 {
-	foreach($files as $file)
+	$filesarr = array_map('trim', explode("\n", $files)); // explode and trim each
+	foreach($filesarr as $file)
 	{
 		if($file[0] == "/")
 		{
@@ -133,7 +128,12 @@ function validateFiles($files)
 
 		if(strpos($file, "/") === False)
 		{
-			err($file . " error: must contain path and name (path)/(file)");
+			err($file . " error: must contain path and name (path)/;(file)");
+		}
+
+		if(strpos($file, ";") === False)
+		{
+			err($file . " error: must contain clear separation path and name using ; (path)/;(file)");
 		}
 	}
 }

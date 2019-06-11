@@ -42,15 +42,7 @@ if(isset($_GET["id"]))
 			$addon["author"] = $addon_data["author"];
 			$addon["forumid"] = $addon_data["forumid"];
 			$addon["url"] = $addon_data["url"];
-			$addon["files"] = "";
-			$files = $db->query("SELECT file FROM files WHERE addon='$idesc'");
-			if($files->num_rows > 0)
-			{
-				while($file = $files->fetch_assoc())
-				{
-					$addon["files"] .= $file["file"] . "\n";
-				}
-			}
+			$addon["files"] = $addon_data["files"];
 		}
 		else
 		{
