@@ -1,21 +1,13 @@
 <?php
-function printInfo($db, $IDS)
+function printInfo($db, $ids)
 {
-	$addons = explode(",", $IDS);
-
-	$info = getInfo($db, $addons);
-	foreach($info as &$addon)
-	{
-		$addon["files"] = getFiles($db, $addon["id"]);
-	}
-
-	print json_encode($info, JSON_UNESCAPED_SLASHES);
+	print json_encode(getInfo($db, $ids), JSON_UNESCAPED_SLASHES);
 }
 
-function getInfo($db, $addons)
+function getInfo($db, $ids)
 {
-	$arr = "('" . implode("', '", $addons) . "')";
-	$sql = "SELECT id, url FROM addons WHERE id IN $arr";
+	$list = "('" . implode("', '", explode(",", $ids)) . "')";
+	$sql = "SELECT id, url, files FROM addons WHERE id IN $list";
 	$res = $db->query($sql);
 
 	if($res->num_rows == 0)
@@ -26,28 +18,17 @@ function getInfo($db, $addons)
 	$rows = array();
 	while($row = $res->fetch_assoc())
 	{
-		$rows[] = $row;
+		$rows[] = constructAddon($row);
 	}
 
 	return $rows;
 }
 
-function getFiles($db, $addon)
+function constructAddon($row)
 {
-	$alias = "file";
-	$sql = "SELECT CONCAT_WS(';', files.path, files.name) AS $alias FROM files WHERE addon='$addon'";
-	$res = $db->query($sql);
-
-	if($res->num_rows == 0)
-	{
-		return array();
-	}
-
-	$files = array();
-	while($row = $res->fetch_assoc())
-	{
-		$files[] = $row[$alias];
-	}
-
-	return $files;
+	$addon = array();
+	$addon["id"] = $row["id"];
+	$addon["url"] = $row["url"];
+	$addon["files"] = explode("\r\n", $row["files"]);
+	return $addon;
 }
