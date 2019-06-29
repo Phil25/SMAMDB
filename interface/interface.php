@@ -13,7 +13,7 @@ include(__DIR__ . "/common/header.php");
 					<input type="text" id="filterAddons" onkeyup="filterItems('filterAddons', 'myAddons')" placeholder="Filter...">
 				</div>
 				<div class="col-sm-2">
-					<a href="form.php"><button>+</button></a>
+					<a href="form.php?table=addons&action=add"><button>+</button></a>
 				</div>
 			</div>
 			<div style="height:300px;overflow:hidden;overflow-y:auto;">
@@ -22,7 +22,7 @@ include(__DIR__ . "/common/header.php");
 				DB::query("SELECT id FROM addons WHERE addedby='" . $_SESSION['steamid'] . "'");
 				while($row = DB::getRow())
 				{
-					echo '<a class="tag tag-rounded tag-green" style="margin:4px" href="editAddon.php?id=' . $row['id'] . '">' . $row['id'] . '</a>';
+					echo '<a class="tag tag-rounded tag-green" style="margin:4px" href="form.php?table=addons&action=edit&id=' . $row['id'] . '">' . $row['id'] . '</a>';
 				}
 				?>
 				</div>

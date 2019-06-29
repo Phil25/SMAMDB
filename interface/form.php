@@ -12,7 +12,7 @@ session_start();
 <body>
 
 <?php
-if(!isset($_SESSION["steamid"])){
+if(!isset($_SESSION["steamid"]) || !isset($_GET["action"])){
 	header("Location: https://smamdb.net/interface/");
 	exit;
 }else{
@@ -26,6 +26,17 @@ include(__DIR__ . "/common/header.php");
 
 <div class="card" style="max-width:1000px;margin:auto;">
 	<?php
+	function fetchAddon($id)
+	{
+		DB::query("SELECT * FROM addons WHERE id=" . DB::quote($id));
+		return DB::getRow();
+	}
+
+	function isGamesAny($games)
+	{
+		return !isset($games) || empty($games) || in_array("any", $games) || (sizeof($games) === 1 && empty($games[0]));
+	}
+
 	if(isset($_SESSION["alert_type"]))
 	{
 		echo '<h5><p class="alert alert-' . $_SESSION["alert_type"] . '">' . $_SESSION["alert_msg"] . '</p></h5>';
@@ -33,19 +44,47 @@ include(__DIR__ . "/common/header.php");
 		unset($_SESSION["alert_msg"]);
 	}
 
-	$form = $_SESSION["form"];
+	$editing = $_GET["action"] === "edit" && isset($_GET["id"]);
 
+	$form = $editing ? fetchAddon($_GET["id"]) : $_SESSION["form"];
+	unset($_SESSION["form"]);
+
+	if($form["pluginid"] > 0)
+	{
+		$form["pluginid_spec"] = "specified";
+	}
+	else if($form["pluginid"] == 0)
+	{
+		$form["pluginid_spec"] = "unspecified";
+	}
+	else
+	{
+		$form["pluginid_spec"] = "extension";
+	}
+
+	$form["games"] = explode(' ', $form["games"]);
+
+	echo '<h3 class="card-title">' . ($editing ? ('Editing ' . $_GET["id"]) : 'Adding new addon') . '</h3>';
 	?>
-	<h3 class="card-title">Adding new addon</h3>
 	<form action="common/process.php" method="post">
-		<input type="hidden" name="table" value="addons">
-		<input type="hidden" name="action" value="add">
+		<input type="hidden" name="table" value="<?php echo $_GET["table"]; ?>">
+		<input type="hidden" name="action" value="<?php echo $_GET["action"]; ?>">
 		<div class="row">
 			<div class="col-sm-6" style="padding:16px;">
 				<div class="form-control-group">
 					<div class="form-control">
-						<label>Name</label>
-						<input type="text" maxlength="32" name="id" placeholder="Addon ID" onkeyup="validateId(this, 'idError');" value="<?php echo $form["id"]; ?>" autofocus required>
+						<?php
+						if($editing)
+						{
+							echo '<label>Name <i>(locked from editing)</i></label>';
+							echo '<input type="text" maxlength="32" name="id" placeholder="Addon ID" value="' . $form["id"] . '" readonly required>';
+						}
+						else
+						{
+							echo '<label>Name</label>';
+							echo '<input type="text" maxlength="32" name="id" placeholder="Addon ID" onkeyup="validateId(this, \'idError\')" value="' .  $form["id"] . '" autofocus required>';
+						}
+						?>
 						<p class="validation-error" id="idError"></p>
 					</div>
 					<div class="form-control">
@@ -74,31 +113,39 @@ include(__DIR__ . "/common/header.php");
 					<legend>Plugin ID</legend>
 					<div class="form-control">
 						<label>
-							<input type="radio" name="pluginid" value="specified" onchange="pluginIdChanged(this.value, 'inputPluginId')" <?php echo (!isset($form["pluginid"]) || $form["pluginid"] === "specified") ? "checked" : "" ?>>
-							Specified <input id="inputPluginId" type="number" min="1" placeholder="Plugin ID" name="pluginid_num" value="<?php echo $form["pluginid_num"]; ?>">
+							<input type="radio" name="pluginid_spec" value="specified" onchange="pluginIdChanged(this.value, 'inputPluginId')" <?php echo ($form["pluginid_spec"] === "specified") ? "checked" : ""; ?>>
+							Specified <input id="inputPluginId" type="number" placeholder="Plugin ID" name="pluginid" value="<?php echo $form["pluginid"]; ?>">
 						</label>
 					</div>
 					<div class="form-control">
 						<label>
-							<input type="radio" name="pluginid" value="extension" onchange="pluginIdChanged(this.value, 'inputPluginId')" <?php echo ($form["pluginid"] === "extension") ? "checked" : ""; ?>>
+							<input type="radio" name="pluginid_spec" value="extension" onchange="pluginIdChanged(this.value, 'inputPluginId')" <?php echo ($form["pluginid_spec"] === "extension") ? "checked" : ""; ?>>
 							Extension
 						</label>
 					</div>
 					<div class="form-control">
 						<label>
-							<input type="radio" name="pluginid" value="unspecified" onchange="pluginIdChanged(this.value, 'inputPluginId')" <?php echo ($form["pluginid"] === "unspecified") ? "checked" : ""; ?>>
-							Unspecified <span class="tooltip">(?)<span class="tooltip-text">Plugin may not have ID.</span></span>
+							<input type="radio" name="pluginid_spec" value="unspecified" onchange="pluginIdChanged(this.value, 'inputPluginId')" <?php echo ($form["pluginid_spec"] === "unspecified") ? "checked" : ""; ?>>
+							Unspecified <span class="tooltip">(?)<span class="tooltip-text">Plugin may not have ID in some cases.</span></span>
 						</label>
 					</div>
 				</fieldset>
 			</div>
 			<div class="col-sm-6" style="padding:16px;">
 				<div class="form-control">
-					<label><span class="tooltip">Base URL<span class="tooltip-text"><a href="https://github.com/Phil25/SMAMDB/wiki/Submitting-a-plugin-or-extension#selecting-base-url-" target="_blank">Learn about Base URL</a></span></span></label>
+					<label><span class="tooltip">Base URL<span class="tooltip-text">
+						<a href="https://github.com/Phil25/SMAMDB/wiki/Submitting-a-plugin-or-extension#selecting-base-url-" target="_blank">Learn about Base URL</a>
+						<br>
+						<a href="https://github.com/Phil25/SMAMDB/wiki/Example-Submissions" target="_blank">Examples</a>
+					</span></span></label>
 					<input type="text" maxlength="128" name="baseurl" placeholder="URL searched for files" value="<?php echo $form["baseurl"]; ?>" required>
 				</div>
 				<div class="form-control">
-					<label><span class="tooltip">Files<span class="tooltip-text"><a href="https://github.com/Phil25/SMAMDB/wiki/Submitting-a-plugin-or-extension#inputting-files-" target="_blank">Learn about Files</a></span></span></label>
+					<label><span class="tooltip">Files<span class="tooltip-text">
+						<a href="https://github.com/Phil25/SMAMDB/wiki/Submitting-a-plugin-or-extension#inputting-files-" target="_blank">Learn about Files</a>
+						<br>
+						<a href="https://github.com/Phil25/SMAMDB/wiki/Example-Submissions" target="_blank">Examples</a>
+					</span></span></label>
 					<textarea name="files" maxlength="1024" cols="40" rows="4" placeholder="plugins/;thriller.smx
 gamedata/;thriller.plugin.txt
 ./;funcommandsX_.*.zip
@@ -109,7 +156,7 @@ gamedata/;thriller.plugin.txt
 				<legend>Applicable games</legend>
 				<div class="form-control">
 					<label>
-						<input type="checkbox" name="games[]" value="any" onchange="checkedAny(this.checked, 'individualGames')" <?php echo (!isset($form["games"]) || in_array("any", $form["games"]) ? "checked" : ""); ?>>Any
+						<input type="checkbox" name="games[]" value="any" onchange="checkedAny(this.checked, 'individualGames')" <?php echo isGamesAny($form["games"]) ? "checked" : ""; ?>>Any
 					</label>
 				</div>
 				<div class="form-control" id="individualGames">
@@ -143,7 +190,8 @@ gamedata/;thriller.plugin.txt
 
 <script type="text/javascript" src="common/form.js"></script>
 <script type="text/javascript">
-checkedAny(true, 'individualGames');
+checkedAny(<?php echo json_encode(isGamesAny($form["games"])); ?>, 'individualGames');
+pluginIdChanged(<?php echo json_encode($form["pluginid_spec"]); ?>, 'inputPluginId');
 
 const ids = new Set([
 	<?php

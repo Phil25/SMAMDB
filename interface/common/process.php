@@ -9,7 +9,7 @@ if($table != "addons" && $table != "appeals")
 }
 
 $action = $_POST["action"];
-if($action != "add" && $action != "update" && $action != "delete")
+if($action != "add" && $action != "edit" && $action != "delete")
 {
 	die("Unknown action: " . $action);
 }
@@ -39,18 +39,29 @@ function redir($good, $action, $table, $msg)
 	$_SESSION["alert_msg"] = $msg;
 	$_SESSION["form"] = $_POST;
 
-	$kind = $action === "add" ? "new" : "update";
-	$object = $table === "addons" ? "addon" : "appeal";
+	$_SESSION["form"]["games"] = implode(' ', $_POST["games"]); // make array for form
 
-	// TODO: indicate whether `appeal` or `addon` and `add` or `edit`
+	// TODO: Include edited addon ID
 
-	header('Location: https://smamdb.net/interface/form.php');
+	$url = "Location: https://smamdb.net/interface/form.php?table=$table&action=$action";
+	if($action === "edit") $url .= "&id=" . $_POST["id"];
+
+	header($url);
 	exit;
+}
+
+if($_POST["pluginid_spec"] == "extension")
+{
+	$_POST["pluginid"] = -1;
+}
+else if($_POST["pluginid_spec"] == "unspecified")
+{
+	$_POST["pluginid"] = 0;
 }
 
 try
 {
-	validateId();
+	validateId($action === "add");
 	validateAuthor();
 	validateDescription();
 	validateCategory();
@@ -69,7 +80,7 @@ catch(Exception $e)
 
 $msg = ($table === "addons" ? "Addon" : "Appeal")
 	. " \"" . $_POST["id"] . "\""
-	. " " . ($action === "add" ? "added" : "updated")
+	. " " . ($action === "add" ? "added" : "edited")
 	. " successfully.";
 
 redir(true, $action, $table, $msg);

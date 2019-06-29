@@ -5,7 +5,7 @@ function checkSet($property) : bool
 	return isset($_POST[$property]) && !empty($_POST[$property]);
 }
 
-function validateId() : bool
+function validateId($checkuse = true) : bool
 {
 	if(!checkSet("id"))
 	{
@@ -24,10 +24,13 @@ function validateId() : bool
 		throw new Exception("Addon ID can only contain letters, numbers, minus (-) and dot (.).");
 	}
 
-	DB::query("SELECT id FROM addons WHERE id=" . DB::quote($id));
-	if(sizeof(DB::getData()) > 0)
+	if($checkuse)
 	{
-		throw new Exception("Addon ID is already in use.");
+		DB::query("SELECT id FROM addons WHERE id=" . DB::quote($id));
+		if(sizeof(DB::getData()) > 0)
+		{
+			throw new Exception("Addon ID is already in use.");
+		}
 	}
 
 	return true;
@@ -85,29 +88,29 @@ function validateCategory() : bool
 
 function validatePluginId() : bool
 {
-	if(!checkSet("pluginid"))
+	if(!checkSet("pluginid_spec"))
 	{
 		throw new Exception("Plugin ID not specified.");
 	}
 
-	if($_POST["pluginid"] === "specified")
+	if($_POST["pluginid_spec"] === "specified")
 	{
-		if(!checkSet("pluginid_num"))
+		if(!checkSet("pluginid"))
 		{
 			throw new Exception("Plugin ID number not specified.");
 		}
 
-		if(!is_numeric($_POST["pluginid_num"]))
+		if(!is_numeric($_POST["pluginid"]))
 		{
 			throw new Exception("Plugin ID is not a number.");
 		}
 
-		if($_POST["pluginid_num"] < 1)
+		if($_POST["pluginid"] < 1)
 		{
 			throw new Exception("Invalid plugin ID number.");
 		}
 	}
-	else if($_POST["pluginid"] != "extension" && $_POST["pluginid"] != "unspecified")
+	else if($_POST["pluginid_spec"] != "extension" && $_POST["pluginid_spec"] != "unspecified")
 	{
 		throw new Exception("Invalid plugin ID.");
 	}
