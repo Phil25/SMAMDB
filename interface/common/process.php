@@ -74,11 +74,43 @@ catch(Exception $e)
 	redir(false, $action, $table, $e->getMessage());
 }
 
-// TODO: actually perfom database ops
+$games = implode(' ', $_POST["games"]);
+$q = "";
 
+if($action === "add")
+{
+	$q = "INSERT INTO $table VALUES ("
+		. DB::quote($_POST["id"]) . ", "
+		. DB::quote($_POST["author"]) . ", "
+		. DB::quote($_POST["description"]) . ", "
+		. $_POST["category"] . ", "
+		. $_POST["pluginid"] . ", "
+		. DB::quote($_POST["baseurl"]) . ", "
+		. DB::quote($_POST["files"]) . ", "
+		. DB::quote($games) . ", "
+		. DB::quote($_POST["deps"]) . ", "
+		. $_SESSION["steamid"] . ", DEFAULT)";
+}
+else if($action === "edit")
+{
+	$q = "UPDATE $table SET "
+		. "`author`=" . DB::quote($_POST["author"]) . ", "
+		. "`description`=" . DB::quote($_POST["description"]) . ", "
+		. "`category`=" . DB::quote($_POST["category"]) . ", "
+		. "`pluginid`=" . DB::quote($_POST["pluginid"]) . ", "
+		. "`baseurl`=" . DB::quote($_POST["baseurl"]) . ", "
+		. "`files`=" . DB::quote($_POST["files"]) . ", "
+		. "`games`=" . DB::quote($games) . ", "
+		. "`deps`=" . DB::quote($_POST["deps"])
+		. " WHERE `id`=" . DB::quote($_POST["id"]);
+}
+
+// TODO: delete action
+
+$success = DB::query($q);
 $msg = ($table === "addons" ? "Addon" : "Appeal")
 	. " \"" . $_POST["id"] . "\""
 	. " " . ($action === "add" ? "added" : "edited")
-	. " successfully.";
+	. ($success ? " successfully." : " unsuccessfully.");
 
-redir(true, $action, $table, $msg);
+redir($success, $action, $table, $msg);

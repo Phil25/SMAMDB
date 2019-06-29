@@ -37,7 +37,7 @@ class DB{
 	{
 		if(empty(self::$conn)) self::connectSelf();
 		self::$statement = self::$conn->prepare($q);
-		self::$statement->execute();
+		return self::$statement->execute();
 	}
 
 	public static function getRow()
