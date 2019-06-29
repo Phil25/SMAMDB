@@ -46,7 +46,7 @@ include(__DIR__ . "/common/header.php");
 
 	$editing = $_GET["action"] === "edit" && isset($_GET["id"]);
 
-	$form = $editing ? fetchAddon($_GET["id"]) : $_SESSION["form"];
+	$form = ($editing && !isset($_SESSION["form"])) ? fetchAddon($_GET["id"]) : $_SESSION["form"];
 	unset($_SESSION["form"]);
 
 	if($form["pluginid"] > 0)

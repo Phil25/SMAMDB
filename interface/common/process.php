@@ -41,8 +41,6 @@ function redir($good, $action, $table, $msg)
 
 	$_SESSION["form"]["games"] = implode(' ', $_POST["games"]); // make array for form
 
-	// TODO: Include edited addon ID
-
 	$url = "Location: https://smamdb.net/interface/form.php?table=$table&action=$action";
 	if($action === "edit") $url .= "&id=" . $_POST["id"];
 
