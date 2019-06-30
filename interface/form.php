@@ -12,7 +12,7 @@ session_start();
 <body>
 
 <?php
-if(!isset($_SESSION["steamid"]) || !isset($_GET["action"])){
+if(!isset($_SESSION["steamid"]) || !isset($_GET["action"]) || !isset($_GET["table"]) || ($_GET["table"] != "addons" && $_GET["table"] != "appeals")){
 	header("Location: https://smamdb.net/interface/");
 	exit;
 }else{
@@ -26,9 +26,9 @@ include(__DIR__ . "/common/header.php");
 
 <div class="card" style="max-width:1000px;margin:auto;">
 	<?php
-	function fetchAddon($id)
+	function fetchAddon($id, $table)
 	{
-		DB::query("SELECT * FROM addons WHERE id=" . DB::quote($id));
+		DB::query("SELECT * FROM " . $table . " WHERE id=" . DB::quote($id));
 		return DB::getRow();
 	}
 
@@ -45,8 +45,9 @@ include(__DIR__ . "/common/header.php");
 	}
 
 	$editing = $_GET["action"] === "edit" && isset($_GET["id"]);
+	$table = $_GET["table"] === "addons" ? "addons" : "appeals"; // potential escape sequence
 
-	$form = ($editing && !isset($_SESSION["form"])) ? fetchAddon($_GET["id"]) : $_SESSION["form"];
+	$form = ($editing && !isset($_SESSION["form"])) ? fetchAddon($_GET["id"], $table) : $_SESSION["form"];
 	unset($_SESSION["form"]);
 
 	if($form["pluginid"] > 0)
@@ -64,7 +65,14 @@ include(__DIR__ . "/common/header.php");
 
 	$form["games"] = explode(' ', $form["games"]);
 
-	echo '<h3 class="card-title">' . ($editing ? ('Editing ' . $_GET["id"]) : 'Adding new addon') . '</h3>';
+	if($editing)
+	{
+		echo '<h3 class="card-title">Editing ' . ($table === "addons" ? "addon" : "appeal") . ': "' . $_GET["id"] .'"</h3>';
+	}
+	else
+	{
+		echo '<h3 class="card-title">Adding new ' . ($table === "addons" ? "addon" : "appeal") . '</h3>';
+	}
 	?>
 	<form action="common/process.php" method="post">
 		<input type="hidden" name="table" value="<?php echo $_GET["table"]; ?>">

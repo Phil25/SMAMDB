@@ -79,6 +79,12 @@ $q = "";
 
 if($action === "add")
 {
+	$acceptedby = 0;
+	if($table === "addons")
+	{
+		$acceptedby = $_SESSION["steamid"];
+	}
+
 	$q = "INSERT INTO $table VALUES ("
 		. DB::quote($_POST["id"]) . ", "
 		. DB::quote($_POST["author"]) . ", "
@@ -89,7 +95,7 @@ if($action === "add")
 		. DB::quote($_POST["files"]) . ", "
 		. DB::quote($games) . ", "
 		. DB::quote($_POST["deps"]) . ", "
-		. $_SESSION["steamid"] . ", DEFAULT)";
+		. $_SESSION["steamid"] . ", $acceptedby, DEFAULT)";
 }
 else if($action === "edit")
 {
