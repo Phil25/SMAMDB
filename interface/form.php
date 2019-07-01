@@ -187,12 +187,16 @@ gamedata/;thriller.plugin.txt
 			</div>
 		</div>
 		<div class="row align-center">
+			<?php if($editing){ ?>
 			<div class="col-sm-6">
 				<a href="<?php echo 'delete.php?table=' . $_GET["table"] . '&id=' . $_GET["id"]; ?>">
 				<button type="button" style="color:darkslategray;background-color:#ff7f7f">Delete</button>
 				</a>
 			</div>
 			<div class="col-sm-6">
+			<?php }else{ ?>
+			<div class="col-sm-12">
+			<?php } ?>
 				<div class="form-control">
 					<input type="submit" <?php echo $editing ? 'value="Update" style="background-color:#7fbf7f"' : '' ?>>
 				</div>
