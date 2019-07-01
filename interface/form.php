@@ -7,7 +7,7 @@ session_start();
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>SMAMDB Manager</title>
-	<link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
+	<link rel="stylesheet" href="/interface/common/mustard-ui.min.css">
 </head>
 <body>
 
