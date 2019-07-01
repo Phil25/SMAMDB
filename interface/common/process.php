@@ -34,7 +34,7 @@ if($table === "addons" && $action === "add")
 if($action === "edit")
 {
 	DB::query("SELECT addedby FROM $table WHERE id=" . DB::quote($_POST["id"]));
-	$row = DB::getData();
+	$row = DB::getRow();
 	if(empty($row) || $row["addedby"] != $sid)
 	{
 		die("No access to this addon");
