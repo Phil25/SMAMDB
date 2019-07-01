@@ -186,9 +186,16 @@ gamedata/;thriller.plugin.txt
 				</div>
 			</div>
 		</div>
-		<div class="align-center">
-			<div class="form-control">
-				<input type="submit">
+		<div class="row align-center">
+			<div class="col-sm-6">
+				<a href="<?php echo 'delete.php?table=' . $_GET["table"] . '&id=' . $_GET["id"]; ?>">
+				<button type="button" style="color:darkslategray;background-color:#ff7f7f">Delete</button>
+				</a>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-control">
+					<input type="submit" <?php echo $editing ? 'value="Update" style="background-color:#7fbf7f"' : '' ?>>
+				</div>
 			</div>
 		</div>
 	<form>

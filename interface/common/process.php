@@ -9,7 +9,7 @@ if($table != "addons" && $table != "appeals")
 }
 
 $action = $_POST["action"];
-if($action != "add" && $action != "edit" && $action != "delete")
+if($action != "add" && $action != "edit")
 {
 	die("Unknown action: " . $action);
 }
@@ -28,6 +28,16 @@ if($table === "addons" && $action === "add")
 	if(sizeof(DB::getData()) === 0)
 	{
 		die("No access to adding addons");
+	}
+}
+
+if($action === "edit")
+{
+	DB::query("SELECT addedby FROM $table WHERE id=" . DB::quote($_POST["id"]));
+	$row = DB::getData();
+	if(empty($row) || $row["addedby"] != $sid)
+	{
+		die("No access to this addon");
 	}
 }
 
@@ -110,8 +120,6 @@ else if($action === "edit")
 		. "`deps`=" . DB::quote($_POST["deps"])
 		. " WHERE `id`=" . DB::quote($_POST["id"]);
 }
-
-// TODO: delete action
 
 $success = DB::query($q);
 $msg = ($table === "addons" ? "Addon" : "Appeal")
