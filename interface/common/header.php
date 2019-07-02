@@ -12,6 +12,11 @@ $basename = basename($_SERVER["SCRIPT_FILENAME"], ".php");
 				{
 					echo '<li>interface home</li>';
 				}
+				else if($basename === "delete")
+				{
+					echo '<li><a href="/interface">interface home</a></li>';
+					echo '<li>deleting ' . $_GET["id"] . '</li>';
+				}
 				else // in form
 				{
 					echo '<li><a href="/interface">interface home</a></li>';
