@@ -127,4 +127,6 @@ $msg = ($table === "addons" ? "Addon" : "Appeal")
 	. " " . ($action === "add" ? "added" : "edited")
 	. ($success ? " successfully." : " unsuccessfully.");
 
+if($action === "add") $action = "edit";
+
 redir($success, $action, $table, $msg);
