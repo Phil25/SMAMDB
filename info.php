@@ -6,7 +6,8 @@ function printInfo($db, $ids)
 
 function getInfo($db, $ids)
 {
-	$sql = isset($_GET["nodeps"]) ? queryNoDeps($db, $ids) : queryDeps($db, $ids);
+	$list = isset($_GET["nodeps"]) ? queryNoDeps($db, $ids) : queryDeps($db, $ids);
+	$sql = "SELECT id, author, description, baseurl, files, deps FROM addons WHERE id IN $list";
 	$res = $db->query($sql);
 
 	if($res->num_rows == 0)
@@ -26,14 +27,14 @@ function getInfo($db, $ids)
 function queryNoDeps($db, $ids) : string
 {
 	$list = toSqlList(explode(",", $ids));
-	return "SELECT id, baseurl, files, games FROM addons WHERE id IN $list";
+	return $list;
 }
 
 function queryDeps($db, $ids) : string
 {
 	$list = explode(",", $ids);
 	joinDeps($db, $list);
-	return "SELECT id, baseurl, files, games FROM addons WHERE id IN " . toSqlList($list);
+	return toSqlList($list);
 }
 
 function joinDeps($db, &$arr) // TODO: need an SQL wizz to turn this into a query
@@ -69,8 +70,11 @@ function constructAddon($row)
 {
 	$addon = array();
 	$addon["id"] = $row["id"];
+	$addon["author"] = $row["author"];
+	$addon["description"] = $row["description"];
 	$addon["url"] = $row["baseurl"];
-	$addon["files"] = explode("\r\n", $row["files"]);
-	$addon["games"] = explode(" ", $row["games"]);
+	if(!empty($row["files"])) $addon["files"] = explode("\r\n", $row["files"]);
+	if(!empty($row["deps"])) $addon["deps"] = explode(" ", $row["deps"]);
+	#$addon["games"] = explode(" ", $row["games"]);
 	return $addon;
 }
